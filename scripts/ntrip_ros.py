@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import importlib.util
+import time
 
 import rclpy
 from rclpy.node import Node
@@ -155,6 +156,12 @@ class NTRIPRos(Node):
     # Start the timer that will check for RTCM data
     self._rtcm_timer = self.create_timer(0.1, self.publish_rtcm)
     return True
+  
+  def wait_for_connection(self):
+    # Loop till you can connect to the NTRIP server
+    while not self._client.connect():
+      self.get_logger().error(f'Retrying in {NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS} seconds.')
+      time.sleep(NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS)
 
   def stop(self):
     self.get_logger().info('Stopping RTCM publisher')
@@ -196,8 +203,10 @@ if __name__ == '__main__':
   # Start the node
   rclpy.init()
   node = NTRIPRos()
-  if not node.run():
-    sys.exit(1)
+  # Wait for internet connection
+  is_connected = node.run()
+  if not is_connected:
+    node.wait_for_connection()
   try:
     # Spin until we are shut down
     rclpy.spin(node)
