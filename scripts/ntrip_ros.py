@@ -199,7 +199,7 @@ if __name__ == '__main__':
   node = NTRIPRos()
   # Wait for internet connection and connect as soon as you get it
   while not node.run():
-    node.get_logger().error(f'Retryying in {NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS} seconds.')    
+    node.get_logger().error(f'Retrying in {NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS} seconds.')    
     time.sleep(NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS)
   try:
     # Spin until we are shut down
