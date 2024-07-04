@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import importlib.util
+import time
 
 import rclpy
 from rclpy.node import Node
@@ -196,8 +197,10 @@ if __name__ == '__main__':
   # Start the node
   rclpy.init()
   node = NTRIPRos()
-  if not node.run():
-    sys.exit(1)
+  # Wait for internet connection and connect as soon as you get it
+  while not node.run():
+    node.get_logger().error(f'Retrying in {NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS} seconds.')    
+    time.sleep(NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS)
   try:
     # Spin until we are shut down
     rclpy.spin(node)
