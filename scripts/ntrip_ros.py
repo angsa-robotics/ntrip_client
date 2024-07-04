@@ -156,12 +156,6 @@ class NTRIPRos(Node):
     # Start the timer that will check for RTCM data
     self._rtcm_timer = self.create_timer(0.1, self.publish_rtcm)
     return True
-  
-  def wait_for_connection(self):
-    # Loop till you can connect to the NTRIP server
-    while not self._client.connect():
-      self.get_logger().error(f'Retrying in {NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS} seconds.')
-      time.sleep(NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS)
 
   def stop(self):
     self.get_logger().info('Stopping RTCM publisher')
@@ -203,10 +197,10 @@ if __name__ == '__main__':
   # Start the node
   rclpy.init()
   node = NTRIPRos()
-  # Wait for internet connection
-  is_connected = node.run()
-  if not is_connected:
-    node.wait_for_connection()
+  # Wait for internet connection and connect as soon as you get it
+  while not node.run():
+    node.get_logger().error(f'Retryying in {NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS} seconds.')    
+    time.sleep(NTRIPClient.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS)
   try:
     # Spin until we are shut down
     rclpy.spin(node)
